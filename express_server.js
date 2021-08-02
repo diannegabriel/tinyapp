@@ -3,10 +3,6 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const charSelection = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-app.use(bodyParser.urlencoded({extended: true}));
-
-// set the view engine to ejs
-app.set('view engine', 'ejs');
 
 function generateRandomString(chars) {
   let result = "";
@@ -20,6 +16,11 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+// set the view engine to ejs
+app.set('view engine', 'ejs');
+
+app.use(bodyParser.urlencoded({extended: true}));
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -40,9 +41,13 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
-  // res.send(generateRandomString(charSelection));
+  // console.log(req.body);  // Log the POST request body to the console
+  // res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  const shortURL = generateRandomString(charSelection);
+  const longURL = req.body.longURL;
+  urlDatabase[shortURL] = longURL;
+  const templateVars = {shortURL, longURL};
+  res.render("urls_show", templateVars);
 });
 
 app.listen(PORT, () => {
