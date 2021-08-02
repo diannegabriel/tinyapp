@@ -50,6 +50,21 @@ app.post("/urls", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.post("/urls/:id", (req, res) => {
+  const shortURL = req.params.id;
+  urlDatabase[shortURL] = req.body.editedURL;
+  res.redirect(`/urls/`)
+})
+
+app.post("/urls/:shortURL/delete", (req, res) => {
+  // console.log(urlDatabase)
+  // console.log(req.params.shortURL)
+  delete urlDatabase[req.params.shortURL];
+  // const templateVars = { urls: urlDatabase };
+  res.redirect("/urls");
+})
+
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
