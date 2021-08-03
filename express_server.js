@@ -79,11 +79,20 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 app.post("/login", (req, res) => {
   res.cookie("username", req.body.username);
-  const templateVars = {
-    urls: urlDatabase,
-    username: req.cookies["username"]
-  }
+  // const templateVars = {
+  //   urls: urlDatabase,
+  //   username: req.cookies["username"]
+  // }
   // console.log(req.body.username)
+  res.redirect("/urls");
+})
+
+app.post("/logout", (req, res) => {
+  res.clearCookie("username");
+  const templateVars = {
+    urls: urlDatabase
+    // username: req.cookies["username"]
+  }
   res.render("urls_index", templateVars);
 })
 
