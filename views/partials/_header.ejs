@@ -15,11 +15,20 @@
 
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav">
-        <form class="form-inline" action="/login" method="POST">
-        <div class="form-group mb-2">
-          <label for="login" class="nav-item nav-link" style="margin: 0px 0px -6px 0px;">Login:</label>
-          <input class="form-control" type="text" name="username" placeholder="username" style="width: 300px; margin: 1em;">
-          <button type="submit" class="btn btn-primary">Sign In</button>
+          <% if ((typeof username == "string") && username) { %>
+            <h5 class="nav-item nav-link" style="margin: auto;"><%= username %></h5>
+          <% } else { %>
+          <form class="form-inline" action="/login" method="POST">
+            <div class="form-group mb-2">
+              <label for="login" class="nav-item nav-link" style="margin: 0px 0px -6px 0px;">Login:</label>
+              <input class="form-control" type="text" name="username" placeholder="username" style="width: 300px; margin: 1em;">
+              <button type="submit" class="btn btn-primary">Sign In</button>
+            </div>
+          </form>
+            <% } %>
+
+
+
         </div>
       </div>
     </form>
