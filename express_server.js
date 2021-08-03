@@ -18,6 +18,10 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const userInformation = {
+
+}
+
 // set the view engine to ejs
 app.set('view engine', 'ejs');
 
@@ -51,6 +55,11 @@ app.get("/u/:shortURL", (req, res) => {
     return
   }
   res.redirect(longURL);
+})
+
+app.get("/register", (req, res) => {
+  // const templateVars;
+  res.render("urls_register");
 })
 
 app.post("/urls", (req, res) => {
