@@ -9,22 +9,18 @@
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
-
-
-
-
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup" style="position: absolute; right: 0px;">
         <div class="navbar-nav">
-          
+
           <% if (!user) { %>
             <form class="form-inline" action="/login" method="POST">
               <div class="form-group mb-2">
-                <!-- <label for="login" class="nav-item nav-link" style="margin: 0px 0px -6px 0px;">Login:</label> -->
-                <input class="form-control" type="text" name="email" placeholder="E-mail" style="width: 200px; margin: 10px 5px 0px 0px;">
-                <button type="submit" class="btn btn-primary" style="margin: 10px 20px 0px 0px;">Sign In</button>
+                
+                <button type="submit" class="btn btn-primary" style="margin: 10px 20px 0px 0px;"><a href="/register" style="color: inherit;">Register</a></button>
+                
               </div>
             </form>
-            
+
           <% } else { %>
             <form method="POST" action="/logout">
               <div class="form-inline">
@@ -33,9 +29,6 @@
                 </div>
               </form>
             <% } %>
-
-
-
         </div>
       </div>
     </form>
