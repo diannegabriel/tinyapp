@@ -77,20 +77,23 @@ app.get("/urls", (req, res) => {
     urls: urlDatabase, 
     user: users[req.cookies["user_id"]]
   };
-    console.log(templateVars)
-    console.log(templateVars.user)
+    // console.log(templateVars)
+    // console.log(templateVars.user)
     // console.log(users[req.cookies["user_id"]])
   res.render("urls_index", templateVars);
 });
 
 app.post("/urls", (req, res) => {
-  const shortURL = generateRandomString(charSelection);
-  const longURL = req.body.longURL;
-  urlDatabase[shortURL] = {
-    longURL,
-    userID: req.cookies["user_id"]
-  };
-  res.redirect(`/urls/${shortURL}`)
+  if (req.cookies["user_id"]) {
+    const shortURL = generateRandomString(charSelection);
+    const longURL = req.body.longURL;
+    urlDatabase[shortURL] = {
+      longURL,
+      userID: req.cookies["user_id"]
+    };
+    return res.redirect(`/urls/${shortURL}`)
+  }
+  res.status(400).send("<center><h1>400 Error! Cannot access this page</h1></center>\n");
 });
 
 app.get("/urls/new", (req, res) => {
@@ -99,7 +102,8 @@ app.get("/urls/new", (req, res) => {
       urls: urlDatabase, 
       user: users[req.cookies["user_id"]]
     };
-    res.render("urls_new", templateVars);
+    console.log(`cookies: `, req.cookies["user_id"])
+    return res.render("urls_new", templateVars);
   }
   res.redirect("/login");
 });
@@ -117,7 +121,7 @@ app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[req.params.shortURL].longURL;
   if (!shortURL || !longURL) {
-    res.status(404).send("<center><h1>404 Error. Link not found!</h1></center");
+    res.status(404).send("<center><h1>404 Error. Link not found!</h1></center>\n");
     return
   }
   res.redirect(longURL);
@@ -154,10 +158,10 @@ app.post("/login", (req, res) => {
     } else {
       console.log(req.body.password);
       console.log(user.password);
-      res.status(400).send("<center><h1>400 Error. Wrong password</h1></center")
+      res.status(400).send("<center><h1>400 Error. Wrong password</h1></center>\n")
     } 
   } else {
-    res.status(400).send("<center><h1>400 Error. E-mail is not registered</h1></center")
+    res.status(400).send("<center><h1>400 Error. E-mail is not registered</h1></center>\n")
   }
 })
 
@@ -187,10 +191,10 @@ app.post("/register", (req, res) => {
       res.cookie("user_id", userID);
       res.redirect("/urls");
     } else {
-      res.status(400).send("<center><h1>400 Error. E-mail already registered.</h1></center");
+      res.status(400).send("<center><h1>400 Error. E-mail already registered.</h1></center>\n");
     }
   } else {
-    res.status(400).send("<center><h1>400 Error. Please enter a valid e-mail and password</h1></center");
+    res.status(400).send("<center><h1>400 Error. Please enter a valid e-mail and password</h1></center>\n");
   }
 });
 
