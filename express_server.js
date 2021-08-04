@@ -5,12 +5,21 @@ const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 const charSelection = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-function generateRandomString(chars) {
+const generateRandomString = (chars) => {
   let result = "";
   for (let i = 6; i > 0; i--) {
     result += chars[Math.floor(Math.random() * chars.length)];
   }
   return result;
+}
+
+const emailChecker = (email) => {
+  for (const user in users) {
+    if (users[user].email === email) {
+      return true
+    }
+  }
+  return false
 }
 
 const urlDatabase = {
@@ -80,25 +89,11 @@ app.get("/u/:shortURL", (req, res) => {
 app.get("/register", (req, res) => {
   // const templateVars;
   const templateVars = {
-    urls: urlDatabase, 
+    // urls: urlDatabase, 
     username: users[req.cookies["user_id"]]
   }
   res.render("urls_register", templateVars);
 })
-
-app.post("/register", (req, res) => {
-  const userID = generateRandomString(charSelection);
-  // console.log(users)
-  
-  users[userID] = {
-    id: userID,
-    email: req.body.email,
-    password: req.body.password
-  }
-  res.cookie("user_id", userID);
-
-  res.redirect("/urls");
-});
 
 app.post("/urls", (req, res) => {
   // console.log(req.body);  // Log the POST request body to the console
@@ -147,6 +142,36 @@ app.post("/logout", (req, res) => {
   }
   res.render("urls_index", templateVars);
 })
+
+app.post("/register", (req, res) => {
+  // const userID = generateRandomString(charSelection);
+  // console.log(users)
+  
+  // users[userID] = {
+  //   userID,
+  //   email: req.body.email,
+  //   password: req.body.password
+  // }
+
+  if (req.body.email && req.body.password) {
+    if (!emailChecker(req.body.email)) {
+      const userID = generateRandomString(charSelection);
+      
+      users[userID] = {
+        userID,
+        email: req.body.email,
+        password: req.body.password
+      }
+
+      res.cookie("user_id", userID);
+      res.redirect("/urls");
+    } else {
+      res.status(400).send("<center><h1>400 Error. E-mail already registered.</h1></center");
+    }
+  } else {
+    res.status(400).send("<center><h1>400 Error. Please enter a valid e-mail and password</h1></center");
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
