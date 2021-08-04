@@ -89,6 +89,7 @@ app.get("/urls", (req, res) => {
     urls: userURLs,
     user: users[userID]
   };
+  // console.log(templateVars)
   res.render("urls_index", templateVars);
 });
 
@@ -135,23 +136,24 @@ app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[req.params.shortURL].longURL;
   if (!shortURL || !longURL) {
-    res.status(404).send("<center><h1>404 Error. Link not found!</h1></center>\n");
-    return
+    return res.status(404).send("<center><h1>404 Error. Link not found!</h1></center>\n");
   }
   res.redirect(longURL);
 })
 
 app.post("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
-  urlDatabase[shortURL].longURL = req.body.editedURL;
-  res.redirect(`/urls/`)
+  if (req.cookies["user_id"] === urlDatabase[shortURL].userID) {
+    urlDatabase[shortURL].longURL = req.body.editedURL;
+  }
+  res.redirect(`/urls/${shortURL}`)
 })
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  // console.log(urlDatabase)
-  // console.log(req.params.shortURL)
-  delete urlDatabase[req.params.shortURL];
-  // const templateVars = { urls: urlDatabase };
+  const shortURL = req.params.shortURL
+  if (req.cookies["user_id"] === urlDatabase[shortURL].userID) {
+    delete urlDatabase[shortURL];
+  }
   res.redirect("/urls");
 })
 
