@@ -31,9 +31,20 @@ const emailExist = (email) => {
   return false
 }
 
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
+
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW"
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW"
+  }
 };
 
 const users = { 
@@ -59,13 +70,27 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+//===/urls===
+
 app.get("/urls", (req, res) => {
   const templateVars = { 
     urls: urlDatabase, 
     user: users[req.cookies["user_id"]]
   };
     console.log(templateVars)
+    console.log(templateVars.user)
+    // console.log(users[req.cookies["user_id"]])
   res.render("urls_index", templateVars);
+});
+
+app.post("/urls", (req, res) => {
+  const shortURL = generateRandomString(charSelection);
+  const longURL = req.body.longURL;
+  urlDatabase[shortURL] = {
+    longURL,
+    userID: req.cookies["user_id"]
+  };
+  res.redirect(`/urls/${shortURL}`)
 });
 
 app.get("/urls/new", (req, res) => {
@@ -75,16 +100,14 @@ app.get("/urls/new", (req, res) => {
       user: users[req.cookies["user_id"]]
     };
     res.render("urls_new", templateVars);
-  } else {
-    res.redirect("/login")
   }
-
+  res.redirect("/login");
 });
 
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { 
     shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL], 
+    longURL: urlDatabase[req.params.shortURL].longURL, 
     user: users[req.cookies["user_id"]]
   };
   res.render("urls_show", templateVars);
@@ -92,7 +115,7 @@ app.get("/urls/:shortURL", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   if (!shortURL || !longURL) {
     res.status(404).send("<center><h1>404 Error. Link not found!</h1></center");
     return
@@ -100,24 +123,9 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 })
 
-app.post("/urls", (req, res) => {
-  // console.log(req.body);  // Log the POST request body to the console
-  // res.send("Ok");         // Respond with 'Ok' (we will replace this)
-  const shortURL = generateRandomString(charSelection);
-  const longURL = req.body.longURL;
-  urlDatabase[shortURL] = longURL;
-  // const templateVars = {
-  //   shortURL, 
-  //   longURL, 
-    // user: users[req.cookies["user_id"]]
-  // };
-  // res.render("urls_show", templateVars);
-  res.redirect(`/urls/${shortURL}`)
-});
-
 app.post("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
-  urlDatabase[shortURL] = req.body.editedURL;
+  urlDatabase[shortURL].longURL = req.body.editedURL;
   res.redirect(`/urls/`)
 })
 
