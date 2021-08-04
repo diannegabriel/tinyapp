@@ -42,6 +42,15 @@ const urlsForUser = (id) => {
   return userURLs;
 }
 
+const shortURLChecker = (url) => {
+  for (const shortURL in urlDatabase) {
+    if (shortURL == url) {
+      return true
+    }
+  }
+  return false
+}
+
 // const urlDatabase = {
 //   "b2xVn2": "http://www.lighthouselabs.ca",
 //   "9sm5xK": "http://www.google.com"
@@ -89,7 +98,6 @@ app.get("/urls", (req, res) => {
     urls: userURLs,
     user: users[userID]
   };
-  // console.log(templateVars)
   res.render("urls_index", templateVars);
 });
 
@@ -110,7 +118,7 @@ app.get("/urls/new", (req, res) => {
   if (req.cookies["user_id"]) {
     const templateVars = { 
       urls: urlDatabase, 
-      user: users[req.cookies["user_id"]]
+      user: users[req.cookies["user_id"]],
     };
     return res.render("urls_new", templateVars);
   }
@@ -127,18 +135,20 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     urls: userURLs,
     user: users[userID],
-    shortURL: req.params.shortURL
+    shortURL: req.params.shortURL,
+    validShortURL: shortURLChecker(req.params.shortURL)
   };
+  console.log(templateVars)
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[req.params.shortURL].longURL;
-  if (!shortURL || !longURL) {
-    return res.status(404).send("<center><h1>404 Error. Link not found!</h1></center>\n");
+  if (!shortURLChecker(shortURL)) {    
+    return res.redirect("/urls")
   }
-  res.redirect(longURL);
+  const longURL = urlDatabase[req.params.shortURL].longURL;
+  res.redirect(longURL)
 })
 
 app.post("/urls/:id", (req, res) => {
@@ -159,7 +169,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 app.get("/login", (req, res) => {
   const templateVars = {
-    user: users[req.cookies["user_id"]]
+    user: users[req.cookies["user_id"]],
   };
   res.render("urls_login", templateVars)
 })
@@ -172,8 +182,6 @@ app.post("/login", (req, res) => {
       res.cookie('user_id', user.userID);
       res.redirect("/urls");
     } else {
-      console.log(req.body.password);
-      console.log(user.password);
       res.status(400).send("<center><h1>400 Error. Wrong password</h1></center>\n")
     } 
   } else {
