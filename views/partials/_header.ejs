@@ -15,22 +15,23 @@
 
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup" style="position: absolute; right: 0px;">
         <div class="navbar-nav">
-          <% if ((typeof username == "string") && username) { %>
-            <form method="POST" action="/logout">
-              <div class="form-inline">
-                <label for="username" class="nav-item nav-link" style="margin: 0px 0px 0px -15px;">Logged in as: <%= username %></h5>
-                <button type="submit" class="btn btn-danger" style="margin: 0px 0px 0px 10px;">Logout</button>
+          
+          <% if (username === null || username === undefined) { %>
+            <form class="form-inline" action="/login" method="POST">
+              <div class="form-group mb-2">
+                <!-- <label for="login" class="nav-item nav-link" style="margin: 0px 0px -6px 0px;">Login:</label> -->
+                <input class="form-control" type="text" name="email" placeholder="E-mail" style="width: 200px; margin: 10px 5px 0px 0px;">
+                <button type="submit" class="btn btn-primary" style="margin: 10px 20px 0px 0px;">Sign In</button>
               </div>
             </form>
-
+            
           <% } else { %>
-          <form class="form-inline" action="/login" method="POST">
-            <div class="form-group mb-2">
-              <!-- <label for="login" class="nav-item nav-link" style="margin: 0px 0px -6px 0px;">Login:</label> -->
-              <input class="form-control" type="text" name="username" placeholder="Username" style="width: 200px; margin: 10px 5px 0px 0px;">
-              <button type="submit" class="btn btn-primary" style="margin: 10px 20px 0px 0px;">Sign In</button>
-            </div>
-          </form>
+            <form method="POST" action="/logout">
+              <div class="form-inline">
+                <label for="email" class="nav-item nav-link" style="margin: 0px 0px 0px -15px;">Logged in as: <%= username.email %></h5>
+                  <button type="submit" class="btn btn-danger" style="margin: 0px 0px 0px 10px;">Logout</button>
+                </div>
+              </form>
             <% } %>
 
 
