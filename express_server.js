@@ -53,7 +53,7 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = { 
     urls: urlDatabase, 
-    username: users[req.cookies["user_id"]]
+    user: users[req.cookies["user_id"]]
   };
     console.log(templateVars)
   res.render("urls_index", templateVars);
@@ -62,7 +62,7 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const templateVars = { 
     urls: urlDatabase, 
-    username: users[req.cookies["user_id"]]
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_new", templateVars);
 });
@@ -71,7 +71,7 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { 
     shortURL: req.params.shortURL, 
     longURL: urlDatabase[req.params.shortURL], 
-    username: users[req.cookies["user_id"]]
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_show", templateVars);
 });
@@ -90,7 +90,7 @@ app.get("/register", (req, res) => {
   // const templateVars;
   const templateVars = {
     // urls: urlDatabase, 
-    username: users[req.cookies["user_id"]]
+    user: users[req.cookies["user_id"]]
   }
   res.render("urls_register", templateVars);
 })
@@ -101,12 +101,13 @@ app.post("/urls", (req, res) => {
   const shortURL = generateRandomString(charSelection);
   const longURL = req.body.longURL;
   urlDatabase[shortURL] = longURL;
-  const templateVars = {
-    shortURL, 
-    longURL, 
-    username: users[req.cookies["user_id"]]
-  };
-  res.render("urls_show", templateVars);
+  // const templateVars = {
+  //   shortURL, 
+  //   longURL, 
+    // user: users[req.cookies["user_id"]]
+  // };
+  // res.render("urls_show", templateVars);
+  res.redirect(`/urls${shortURL}`)
 });
 
 app.post("/urls/:id", (req, res) => {
@@ -134,8 +135,8 @@ app.post("/login", (req, res) => {
 })
 
 app.post("/logout", (req, res) => {
-  // res.clearCookie("username");
-  res.clearCookie("user_id");
+  res.clearCookie("username");
+  // res.clearCookie("user_id");
   const templateVars = {
     urls: urlDatabase,
     username: users[req.cookies["user_id"]]
