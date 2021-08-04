@@ -13,7 +13,16 @@ const generateRandomString = (chars) => {
   return result;
 }
 
-const emailChecker = (email) => {
+const emailChecker = (email, users) => {
+  for (const user in users) {
+    if (users[user].email === email) {
+      return users[user]
+    }
+  }
+  return undefined
+}
+
+const emailExist = (email) => {
   for (const user in users) {
     if (users[user].email === email) {
       return true
@@ -29,12 +38,12 @@ const urlDatabase = {
 
 const users = { 
   "userRandomID": {
-    id: "userRandomID", 
+    userID: "userRandomID", 
     email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
+    password: "purple"
   },
  "user2RandomID": {
-    id: "user2RandomID", 
+    userID: "user2RandomID", 
     email: "user2@example.com", 
     password: "dishwasher-funk"
   }
@@ -86,22 +95,6 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 })
 
-app.get("/register", (req, res) => {
-  // const templateVars;
-  const templateVars = {
-    user: users[req.cookies["user_id"]]
-  }
-  res.render("urls_register", templateVars);
-})
-
-app.get("/login", (req, res) => {
-  const templateVars = {
-    user: users[req.cookies["user_id"]]
-  };
-  // console.log(templateVars)
-  res.render("urls_login", templateVars)
-})
-
 app.post("/urls", (req, res) => {
   // console.log(req.body);  // Log the POST request body to the console
   // res.send("Ok");         // Respond with 'Ok' (we will replace this)
@@ -131,41 +124,45 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect("/urls");
 })
 
+app.get("/login", (req, res) => {
+  const templateVars = {
+    user: users[req.cookies["user_id"]]
+  };
+  res.render("urls_login", templateVars)
+})
+
 app.post("/login", (req, res) => {
-  res.cookie("username", req.body.username);
-  // const templateVars = {
-  //   urls: urlDatabase,
-  //   user: users[req.cookies["user_id"]]
-  // }
-  console.log(req.body)
-  // res.cookie("user_id", users.userID[email]);
-  res.redirect("/urls");
+  const user = emailChecker(req.body.email, users);
+
+  if (user) {
+    if (req.body.password === user.password) {
+      res.cookie('user_id', user.userID);
+      res.redirect("/urls");
+    } else {
+      console.log(req.body.password);
+      console.log(user.password);
+      res.status(400).send("<center><h1>400 Error. Wrong password</h1></center")
+    } 
+  } else {
+    res.status(400).send("<center><h1>400 Error. E-mail is not registered</h1></center")
+  }
 })
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
   res.clearCookie("user_id");
-  res.clearCookie("user");
-  // const templateVars = {
-  //   urls: urlDatabase,
-  //   user: users[req.cookies["user_id"]]
-  // }
-  // res.render("urls_index", templateVars);
   res.redirect("/urls");
 })
 
-app.post("/register", (req, res) => {
-  // const userID = generateRandomString(charSelection);
-  // console.log(users)
-  
-  // users[userID] = {
-  //   userID,
-  //   email: req.body.email,
-  //   password: req.body.password
-  // }
+app.get("/register", (req, res) => {
+  const templateVars = {
+    user: users[req.cookies["user_id"]]
+  }
+  res.render("urls_register", templateVars);
+})
 
+app.post("/register", (req, res) => {
   if (req.body.email && req.body.password) {
-    if (!emailChecker(req.body.email)) {
+    if (!emailExist(req.body.email)) {
       const userID = generateRandomString(charSelection);
       
       users[userID] = {
