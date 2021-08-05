@@ -164,7 +164,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
     delete urlDatabase[shortURL];
     return res.redirect("/urls");
   }
-  return res.status(403).send("403 Error. Cannot access this page.\n");
+  res.status(403).send("403 Error. Cannot access this page.\n");
 });
 
 //==============================GET /login===================================
@@ -194,9 +194,9 @@ app.post("/login", (req, res) => {
   if (!bcrypt.compareSync(req.body.password, user.password)) {
     return res.status(403).send("<center><h1>403 Error: Wrong password.</h1></center>\n");
   }
-
+  
   req.session.user_id = user.userID;
-  return res.redirect("/urls");
+  res.redirect("/urls");
 });
 
 //============================POST /logout==================================
