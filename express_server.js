@@ -1,15 +1,15 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const cookieSession = require('cookie-session')
+const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 const app = express();
 const PORT = 8080; // default port 8080
-const { 
+const {
   generateRandomString,
   getUserByEmail,
   urlsForUser,
   shortURLChecker
-  } = require('./helpers');
+} = require('./helpers');
 
 // Set the view engine to ejs
 app.set('view engine', 'ejs');
@@ -19,7 +19,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieSession({
   name: 'session',
   keys: ['purple-delicious-icecream-lover']
-}))
+}));
 
 //=============================EXAMPLE DATA=================================
 
@@ -34,13 +34,13 @@ const urlDatabase = {
   }
 };
 
-const users = { 
+const users = {
   "aJ48lW": {
-    userID: "aJ48lW", 
-    email: "user@example.com", 
+    userID: "aJ48lW",
+    email: "user@example.com",
     password: bcrypt.hashSync("purple", 10)
   }
-}
+};
 
 //=============================LANDING PAGE================================
 
@@ -83,7 +83,7 @@ app.post("/urls", (req, res) => {
       longURL,
       userID: req.session.user_id,
     };
-    return res.redirect(`/urls/${shortURL}`)
+    return res.redirect(`/urls/${shortURL}`);
   }
   res.status(400).send("<center><h1>400 Error! Cannot access this page</h1></center>\n");
 });
@@ -97,8 +97,8 @@ app.post("/urls", (req, res) => {
 */
 app.get("/urls/new", (req, res) => {
   if (req.session.user_id) {
-    const templateVars = { 
-      urls: urlDatabase, 
+    const templateVars = {
+      urls: urlDatabase,
       user: users[req.session.user_id],
     };
     return res.render("urls_new", templateVars);
@@ -126,18 +126,18 @@ app.get("/urls/:shortURL", (req, res) => {
 
 /*
 * Redirects anyone to the longURL
-* This link must be accessible to anyone, 
+* This link must be accessible to anyone,
 * regardless if they have an account or not
 * shortURLChecker checks if that shortURL is in the database
 */
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  if (!shortURLChecker(shortURL, urlDatabase)) {    
-    return res.redirect(`/urls/:${shortURL}`)
+  if (!shortURLChecker(shortURL, urlDatabase)) {
+    return res.redirect(`/urls/:${shortURL}`);
   }
   const longURL = urlDatabase[req.params.shortURL].longURL;
-  res.redirect(longURL)
-})
+  res.redirect(longURL);
+});
 
 //===========================POST /urls/:id==================================
 
@@ -147,25 +147,25 @@ app.post("/urls/:id", (req, res) => {
   if (req.session.user_id === urlDatabase[shortURL].userID) {
     urlDatabase[shortURL].longURL = req.body.editedURL;
   }
-  res.redirect(`/urls`)
-})
+  res.redirect(`/urls`);
+});
 
 //======================POST /urls/:shortURL/delete==========================
 
-/* 
+/*
 * Deletes the user's shortURL
 * To verify that no one else can delete shortURLs,
 * type 'curl -X POST -i localhost:8080/urls/b6UTxQ/delete' in the terminal
 * Using the browser will result to: Cannot GET /urls/b6UTxQ/delete
 */
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const shortURL = req.params.shortURL
+  const shortURL = req.params.shortURL;
   if (req.session.user_id === urlDatabase[shortURL].userID) {
     delete urlDatabase[shortURL];
     return res.redirect("/urls");
   }
-  return res.status(403).send("403 Error. Cannot access this page.\n")
-})
+  return res.status(403).send("403 Error. Cannot access this page.\n");
+});
 
 //==============================GET /login===================================
 //=============================POST /login===================================
@@ -175,8 +175,8 @@ app.get("/login", (req, res) => {
   const templateVars = {
     user: users[req.session.user_id],
   };
-  res.render("urls_login", templateVars)
-})
+  res.render("urls_login", templateVars);
+});
 
 /*
 * Logs the user in with valid email and password
@@ -192,11 +192,11 @@ app.post("/login", (req, res) => {
       req.session.user_id = user.userID;
       return res.redirect("/urls");
     } else {
-      return res.status(403).send("<center><h1>403 Error: Wrong password.</h1></center>\n")
-    } 
+      return res.status(403).send("<center><h1>403 Error: Wrong password.</h1></center>\n");
+    }
   }
-  res.status(404).send("<center><h1>404 Error. E-mail is not found.</h1></center>\n")
-})
+  res.status(404).send("<center><h1>404 Error. E-mail is not found.</h1></center>\n");
+});
 
 //============================POST /logout==================================
 
@@ -204,7 +204,7 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
   req.session = null;
   res.redirect("/urls");
-})
+});
 
 //============================GET /register=================================
 //===========================POST /register=================================
@@ -213,11 +213,11 @@ app.post("/logout", (req, res) => {
 app.get("/register", (req, res) => {
   const templateVars = {
     user: users[req.session.user_id],
-  }
+  };
   res.render("urls_register", templateVars);
-})
+});
 
-/* 
+/*
 * Registers a new user
 * Returns 409 error if email is already in the databse
 * Returns 404 error if either email and/or password are invalid
@@ -231,13 +231,13 @@ app.post("/register", (req, res) => {
         email: req.body.email,
         // Hash password for protection
         password: bcrypt.hashSync(req.body.password, 10)
-      }
+      };
       req.session.user_id = userID;
       return res.redirect("/urls");
     } else {
       return res.status(409).send("<center><h1>409 Error. E-mail already registered.</h1></center>\n");
     }
-  } 
+  }
   return res.status(400).send("<center><h1>404 Error. Please enter a valid e-mail and password.</h1></center>\n");
 });
 
