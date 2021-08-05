@@ -3,9 +3,14 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
-const charSelection = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const bcrypt = require('bcrypt');
 
-const generateRandomString = (chars) => {
+// const password = "purple-monkey-dinosaur";
+// const hashedPassword = bcrypt.hashSync(password, 10);
+// console.log(hashedPassword)
+
+const generateRandomString = () => {
+  const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let result = "";
   for (let i = 6; i > 0; i--) {
     result += chars[Math.floor(Math.random() * chars.length)];
@@ -103,7 +108,7 @@ app.get("/urls", (req, res) => {
 
 app.post("/urls", (req, res) => {
   if (req.cookies["user_id"]) {
-    const shortURL = generateRandomString(charSelection);
+    const shortURL = generateRandomString();
     const longURL = req.body.longURL;
     urlDatabase[shortURL] = {
       longURL,
@@ -178,7 +183,7 @@ app.post("/login", (req, res) => {
   const user = emailChecker(req.body.email, users);
 
   if (user) {
-    if (req.body.password === user.password) {
+    if (bcrypt.compareSync(req.body.password, user.password)) {
       res.cookie('user_id', user.userID);
       res.redirect("/urls");
     } else {
@@ -204,12 +209,12 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   if (req.body.email && req.body.password) {
     if (!emailExist(req.body.email)) {
-      const userID = generateRandomString(charSelection);
+      const userID = generateRandomString();
       
       users[userID] = {
         userID,
         email: req.body.email,
-        password: req.body.password
+        password: bcrypt.hashSync(req.body.password, 10)
       }
       res.cookie("user_id", userID);
       res.redirect("/urls");
