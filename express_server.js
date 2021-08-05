@@ -180,22 +180,23 @@ app.get("/login", (req, res) => {
 
 /*
 * Logs the user in with valid email and password
-* Returns 403 error if password is wrong
 * Returns 404 error if email is not found in the database
+* Returns 403 error if password is wrong
 */
 app.post("/login", (req, res) => {
   const user = getUserByEmail(req.body.email, users);
-  
-  if (user) {
-    // Ensures hashed password and typed password match
-    if (bcrypt.compareSync(req.body.password, user.password)) {
-      req.session.user_id = user.userID;
-      return res.redirect("/urls");
-    } else {
-      return res.status(403).send("<center><h1>403 Error: Wrong password.</h1></center>\n");
-    }
+
+  if (!user) {
+    return res.status(404).send("<center><h1>404 Error: E-mail is not found.</h1></center>\n");
   }
-  res.status(404).send("<center><h1>404 Error. E-mail is not found.</h1></center>\n");
+
+  // Ensures hashed password and typed password match
+  if (!bcrypt.compareSync(req.body.password, user.password)) {
+    return res.status(403).send("<center><h1>403 Error: Wrong password.</h1></center>\n");
+  }
+
+  req.session.user_id = user.userID;
+  return res.redirect("/urls");
 });
 
 //============================POST /logout==================================
@@ -220,25 +221,26 @@ app.get("/register", (req, res) => {
 /*
 * Registers a new user
 * Password is being hashed for client and server's safety
-* Returns 409 error if email is already in the databse
 * Returns 404 error if either email and/or password are invalid
+* Returns 409 error if email is already in the databse
 */
 app.post("/register", (req, res) => {
-  if (req.body.email && req.body.password) {
-    if (!getUserByEmail(req.body.email, users)) {
-      const userID = generateRandomString();
-      users[userID] = {
-        userID,
-        email: req.body.email,
-        password: bcrypt.hashSync(req.body.password, 10)
-      };
-      req.session.user_id = userID;
-      return res.redirect("/urls");
-    } else {
-      return res.status(409).send("<center><h1>409 Error. E-mail already registered.</h1></center>\n");
-    }
+  if (!req.body.email || !req.body.password) {
+    return res.status(400).send("<center><h1>404 Error. Please enter a valid e-mail and password.</h1></center>\n");
   }
-  return res.status(400).send("<center><h1>404 Error. Please enter a valid e-mail and password.</h1></center>\n");
+
+  if (getUserByEmail(req.body.email, users)) {
+    return res.status(409).send("<center><h1>409 Error. E-mail already registered.</h1></center>\n");
+  }
+
+  const userID = generateRandomString();
+  users[userID] = {
+    userID,
+    email: req.body.email,
+    password: bcrypt.hashSync(req.body.password, 10)
+  };
+  req.session.user_id = userID;
+  res.redirect("/urls");
 });
 
 //=============================LISTEN PORT===============================
