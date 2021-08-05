@@ -2,60 +2,15 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
-// const cookieParser = require('cookie-parser');
 var cookieSession = require('cookie-session')
 const bcrypt = require('bcrypt');
+const { 
+  generateRandomString,
+  getUserByEmail,
+  urlsForUser,
+  shortURLChecker
+  } = require('./helpers');
 
-// const password = "purple-monkey-dinosaur";
-// const hashedPassword = bcrypt.hashSync(password, 10);
-// console.log(hashedPassword)
-
-const generateRandomString = () => {
-  const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  let result = "";
-  for (let i = 6; i > 0; i--) {
-    result += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return result;
-}
-
-const emailChecker = (email, users) => {
-  for (const user in users) {
-    if (users[user].email === email) {
-      return users[user]
-    }
-  }
-  return undefined
-}
-
-const emailExist = (email) => {
-  for (const user in users) {
-    if (users[user].email === email) {
-      return true
-    }
-  }
-  return false
-}
-
-const urlsForUser = (id) => {
-  let userURLs = {};
-  
-  for (const shortURL in urlDatabase) {
-    if (urlDatabase[shortURL].userID === id) {
-      userURLs[shortURL] = urlDatabase[shortURL];
-    }
-  }
-  return userURLs;
-}
-
-const shortURLChecker = (url) => {
-  for (const shortURL in urlDatabase) {
-    if (shortURL == url) {
-      return true
-    }
-  }
-  return false
-}
 
 const urlDatabase = {
   b6UTxQ: {
@@ -98,7 +53,7 @@ app.get("/urls", (req, res) => {
   //   user: users[req.cookies["user_id"]]
   // };
   const userID = req.session.user_id;
-  const userURLs = urlsForUser(userID);
+  const userURLs = urlsForUser(userID, urlDatabase);
   const templateVars = {
     urls: userURLs,
     user: users[userID]
@@ -132,20 +87,20 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const userID = req.session.user_id;
-  const userURLs = urlsForUser(userID);
+  const userURLs = urlsForUser(userID, urlDatabase);
   const templateVars = {
     urls: userURLs,
     user: users[userID],
     shortURL: req.params.shortURL,
-    validShortURL: shortURLChecker(req.params.shortURL)
+    validShortURL: shortURLChecker(req.params.shortURL, urlDatabase)
   };
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  if (!shortURLChecker(shortURL)) {    
-    return res.redirect("/urls")
+  if (!shortURLChecker(shortURL, urlDatabase)) {    
+    return res.redirect(`/urls/:${shortURL}`)
   }
   const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL)
@@ -175,7 +130,7 @@ app.get("/login", (req, res) => {
 })
 
 app.post("/login", (req, res) => {
-  const user = emailChecker(req.body.email, users);
+  const user = getUserByEmail(req.body.email, users);
 
   if (user) {
     if (bcrypt.compareSync(req.body.password, user.password)) {
@@ -204,7 +159,7 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
   if (req.body.email && req.body.password) {
-    if (!emailExist(req.body.email)) {
+    if (!getUserByEmail(req.body.email, users)) {
       const userID = generateRandomString();
       
       users[userID] = {
@@ -213,12 +168,16 @@ app.post("/register", (req, res) => {
         password: bcrypt.hashSync(req.body.password, 10)
       }
       req.session.user_id = userID;
-      res.redirect("/urls");
+      return res.redirect("/urls");
     } else {
-      res.status(400).send("<center><h1>400 Error. E-mail already registered.</h1></center>\n");
+      const templateVars = {
+        user: users[req.session.user_id]
+      }
+      // res.render("urls_register", templateVars);
+      return res.status(400).send("<center><h1>400 Error. E-mail already registered.</h1></center>\n");
     }
   } else {
-    res.status(400).send("<center><h1>400 Error. Please enter a valid e-mail and password</h1></center>\n");
+    return res.status(400).send("<center><h1>400 Error. Please enter a valid e-mail and password</h1></center>\n");
   }
 });
 

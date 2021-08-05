@@ -26,10 +26,12 @@
     </div>
   </div>
   <% } else if (validShortURL === false) { %>
-    <h5 style="margin: 1em;">This URL ID does not exist. Please enter a valid URL ID.</h5>
+    <h5 style="margin: 1em;">This URL ID does not exist.</h5>
   <% } else { %>
-    <h5 style="margin: 1em;">You do not have access to this URL.</h5>
+    <h5 style="margin: 1em;">You do not have access to this URL ID.</h5>
   <% } %>
+  <% } else if (validShortURL === false) { %>
+    <h5 style="margin: 1em;">This URL ID does not exist.</h5>
   <% } else { %>
     <h5 style="margin: 1em;">You must login or register to see this URL.</h5>
   <% } %>
