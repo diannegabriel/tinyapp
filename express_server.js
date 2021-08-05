@@ -76,7 +76,7 @@ const users = {
   "aJ48lW": {
     userID: "aJ48lW", 
     email: "user@example.com", 
-    password: "purple"
+    password: bcrypt.hashSync("purple", 10)
   }
 }
 
