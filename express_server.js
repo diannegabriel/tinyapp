@@ -57,11 +57,6 @@ const shortURLChecker = (url) => {
   return false
 }
 
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
-
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
@@ -88,10 +83,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 // app.use(cookieParser());
 app.use(cookieSession({
   name: 'session',
-  keys: [/* secret keys */],
-
-  // Cookie Options
-  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  keys: ['purple-delicious-icecream-lover']
 }))
 
 app.get("/", (req, res) => {
@@ -105,7 +97,7 @@ app.get("/urls", (req, res) => {
   //   urls: urlDatabase, 
   //   user: users[req.cookies["user_id"]]
   // };
-  const userID = req.cookies['user_id'];
+  const userID = req.session.user_id;
   const userURLs = urlsForUser(userID);
   const templateVars = {
     urls: userURLs,
@@ -120,7 +112,7 @@ app.post("/urls", (req, res) => {
     const longURL = req.body.longURL;
     urlDatabase[shortURL] = {
       longURL,
-      userID: req.cookies["user_id"]
+      userID: req.session.user_id
     };
     return res.redirect(`/urls/${shortURL}`)
   }
@@ -128,10 +120,10 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  if (req.cookies["user_id"]) {
+  if (req.session.user_id) {
     const templateVars = { 
       urls: urlDatabase, 
-      user: users[req.cookies["user_id"]],
+      user: users[req.session.user_id],
     };
     return res.render("urls_new", templateVars);
   }
@@ -139,11 +131,7 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  // const templateVars = { 
-  //   longURL: urlDatabase[req.params.shortURL].longURL, 
-  //   user: users[req.cookies["user_id"]]
-  // };
-  const userID = req.cookies['user_id'];
+  const userID = req.session.user_id;
   const userURLs = urlsForUser(userID);
   const templateVars = {
     urls: userURLs,
@@ -151,7 +139,6 @@ app.get("/urls/:shortURL", (req, res) => {
     shortURL: req.params.shortURL,
     validShortURL: shortURLChecker(req.params.shortURL)
   };
-  console.log(templateVars)
   res.render("urls_show", templateVars);
 });
 
@@ -166,7 +153,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 app.post("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
-  if (req.cookies["user_id"] === urlDatabase[shortURL].userID) {
+  if (req.session.user_id === urlDatabase[shortURL].userID) {
     urlDatabase[shortURL].longURL = req.body.editedURL;
   }
   res.redirect(`/urls/${shortURL}`)
@@ -174,7 +161,7 @@ app.post("/urls/:id", (req, res) => {
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL
-  if (req.cookies["user_id"] === urlDatabase[shortURL].userID) {
+  if (req.session.user_id === urlDatabase[shortURL].userID) {
     delete urlDatabase[shortURL];
   }
   res.redirect("/urls");
@@ -182,7 +169,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 app.get("/login", (req, res) => {
   const templateVars = {
-    user: users[req.cookies["user_id"]],
+    user: users[req.session.user_id],
   };
   res.render("urls_login", templateVars)
 })
@@ -192,7 +179,7 @@ app.post("/login", (req, res) => {
 
   if (user) {
     if (bcrypt.compareSync(req.body.password, user.password)) {
-      res.cookie('user_id', user.userID);
+      req.session.user_id = user.userID;
       res.redirect("/urls");
     } else {
       res.status(400).send("<center><h1>400 Error. Wrong password</h1></center>\n")
@@ -203,13 +190,14 @@ app.post("/login", (req, res) => {
 })
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  res.clearCookie('session');
+  res.clearCookie('session.sig');
   res.redirect("/urls");
 })
 
 app.get("/register", (req, res) => {
   const templateVars = {
-    user: users[req.cookies["user_id"]]
+    user: users[req.session.user_id]
   }
   res.render("urls_register", templateVars);
 })
@@ -224,7 +212,7 @@ app.post("/register", (req, res) => {
         email: req.body.email,
         password: bcrypt.hashSync(req.body.password, 10)
       }
-      res.cookie("user_id", userID);
+      req.session.user_id = userID;
       res.redirect("/urls");
     } else {
       res.status(400).send("<center><h1>400 Error. E-mail already registered.</h1></center>\n");
