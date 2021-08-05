@@ -173,7 +173,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 // Renders urls_login template. Shows two input forms for email and password
 app.get("/login", (req, res) => {
   const templateVars = {
-    user: users[req.session.user_id],
+    user: users[req.session.user_id]
   };
   res.render("urls_login", templateVars);
 });
@@ -219,6 +219,7 @@ app.get("/register", (req, res) => {
 
 /*
 * Registers a new user
+* Password is being hashed for client and server's safety
 * Returns 409 error if email is already in the databse
 * Returns 404 error if either email and/or password are invalid
 */
@@ -229,7 +230,6 @@ app.post("/register", (req, res) => {
       users[userID] = {
         userID,
         email: req.body.email,
-        // Hash password for protection
         password: bcrypt.hashSync(req.body.password, 10)
       };
       req.session.user_id = userID;
