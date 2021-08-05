@@ -13,8 +13,8 @@
   <%- include('partials/_header') %>
 
   <main style="margin: 1em;">
-    <h3>My URLs</h3>
     <% if (user) { %>
+    <h3>My URLs</h3>
     <table class="table">
       <thead>
         <tr>
@@ -29,17 +29,22 @@
           <tr>
             <td><a href="/u/<%= url %>"><%= url %></a></td>
             <td><%= urls[url].longURL %></td>
-            <td><form method="GET" action="/urls/<%= url %>">
-              <button type="submit" class="btn btn-primary">Edit</button>
-            </form></td>
-            <td><form method="POST" action="/urls/<%= url %>/delete">
-              <button type="submit" class="btn btn-primary">Delete</button>
-            </form></td>
+            <td>
+              <form method="GET" action="/urls/<%= url %>">
+                <button type="submit" class="btn btn-info">Edit</button>
+              </form>
+            </td>
+            <td>
+              <form method="POST" action="/urls/<%= url %>/delete">
+                <button type="submit" class="btn btn-dark">Delete</button>
+              </form>
+            </td>
           </tr>
         <% } %>
       </tbody>
     </table>
     <% } else { %>
+      <h3>Welcome to Tiny App!</h3>
       <h5>Please log in or create an account to access your URLs.</h5>
     <% } %>
   </main>
