@@ -3,6 +3,10 @@ An app that creates and keeps track of a user's shortened URLs (reminescent of b
 
 ## Final Product
 
+!["Screenshot of URLs page"](https://github.com/diannegabriel/tinyapp/blob/master/docs/urls_page.png)
+
+!["Screenshot of a shorten URL page"](https://github.com/diannegabriel/tinyapp/blob/master/docs/urls_shortURL.png)
+
 ## Dependencies
 
 - Node.js
